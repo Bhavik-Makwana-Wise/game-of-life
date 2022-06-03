@@ -22,6 +22,7 @@ pub enum Cell {
 }
 
 #[wasm_bindgen]
+#[derive(Debug)]
 pub struct Universe {
     width: u32,
     height: u32,
@@ -44,9 +45,9 @@ impl fmt::Display for Universe {
 
 #[wasm_bindgen]
 impl Universe {
-    pub fn new(width: u32, height: u32) -> Universe {
-        let width = width;
-        let height = height;
+    pub fn new() -> Universe {
+        let width = 64;
+        let height = 64;
         let size = (width * height) as usize;
         let mut cells = FixedBitSet::with_capacity(size);
 
@@ -58,6 +59,22 @@ impl Universe {
             width,
             height,
             cells,
+        }
+    }
+
+    pub fn set_width(&mut self, width: u32) {
+        self.width = width;
+        self.cells = FixedBitSet::with_capacity((width*self.height) as usize);
+        for cell in 0..width*self.height {
+            self.cells.set(cell as usize, false);
+        }
+    }
+
+    pub fn set_height(&mut self, height: u32) {
+        self.height = height;
+        self.cells = FixedBitSet::with_capacity((self.width*height) as usize);
+        for cell in 0..self.width*height {
+            self.cells.set(cell as usize, false);
         }
     }
 
@@ -119,4 +136,15 @@ impl Universe {
     }
 }
 
+impl Universe {
+    pub fn get_cells(&self) -> &FixedBitSet {
+        &self.cells
+    }
 
+    pub fn set_cells(&mut self, cells: &[(u32, u32)]) {
+        for (row, col) in cells.iter().cloned() {
+            let idx = self.get_index(row, col);
+            self.cells.set(idx, true);
+        }
+    }
+}
