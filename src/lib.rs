@@ -179,17 +179,45 @@ impl Universe {
 
     fn live_neighbour_count(&self, row: u32, column: u32) -> u8 {
         let mut count = 0;
-        for delta_row in [self.height - 1, 0, 1].iter().cloned() {
-            for delta_col in [self.width - 1, 0, 1].iter().cloned() {
-                if delta_row == 0 && delta_col == 0 {
+        let north = if row == 0 {
+            self.height - 1
+        } else {
+            row - 1
+        };
+
+        let south = if row == self.height - 1 {
+            0
+        } else {
+            row + 1
+        };
+
+        let west = if column == 0 {
+            self.width - 1
+        } else {
+            column - 1
+        };
+
+        let east = if column == self.width - 1 {
+            0
+        } else {
+            column + 1
+        };
+
+        //let nw = self.get_index(north, west);
+        //count += self.cells[nw] as u8;
+
+        //let n = self.get_index(north, column);
+        //count += self.cells[n] as u8;
+        for d_row in [north, south, row].iter() {
+            for d_col in [east, west, column].iter() {
+                if *d_row == row && *d_col == column {
                     continue;
                 }
-                let neighbour_row = (row + delta_row) % self.height;
-                let neighbour_col = (column + delta_col) % self.width;
-                let idx = self.get_index(neighbour_row, neighbour_col);
+                let idx = self.get_index(*d_row, *d_col);
                 count += self.cells[idx] as u8;
             }
         }
+
         count
     }
 }
