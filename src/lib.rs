@@ -52,6 +52,7 @@ pub struct Universe {
     width: u32,
     height: u32,
     cells: FixedBitSet,
+    update: FixedBitSet,
 }
 
 
@@ -76,6 +77,7 @@ impl Universe {
         let height = 64;
         let size = (width * height) as usize;
         let mut cells = FixedBitSet::with_capacity(size);
+        let update = FixedBitSet::with_capacity(size);
 
         for cell in  0..size {
             cells.set(cell, js_sys::Math::random() < 0.5);
@@ -85,6 +87,7 @@ impl Universe {
             width,
             height,
             cells,
+            update,
         }
     }
 
@@ -133,7 +136,6 @@ impl Universe {
 
     pub fn tick(&mut self) {
         let _timer = Timer::new("Univers::tick");
-        let mut next = self.cells.clone();
 
         for row in 0..self.height {
             for col in 0..self.width {
@@ -148,7 +150,7 @@ impl Universe {
                 //    live_neighbours
                 //);
 
-                next.set(idx, match (cell, live_neighbours) {
+                self.update.set(idx, match (cell, live_neighbours) {
                     (true, x) if x < 2 => false,
                     (true, 2) | (true, 3) => true,
                     (true, x) if x > 3 => false,
@@ -158,7 +160,7 @@ impl Universe {
                 // log!("     it becomes {:?}", next[idx]);
             }
         }
-        self.cells = next;
+        self.cells = self.update.clone();
     }
     
     pub fn width(&self) -> u32 {
@@ -203,11 +205,6 @@ impl Universe {
             column + 1
         };
 
-        //let nw = self.get_index(north, west);
-        //count += self.cells[nw] as u8;
-
-        //let n = self.get_index(north, column);
-        //count += self.cells[n] as u8;
         for d_row in [north, south, row].iter() {
             for d_col in [east, west, column].iter() {
                 if *d_row == row && *d_col == column {
