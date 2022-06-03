@@ -70,6 +70,24 @@ impl Universe {
         }
     }
 
+    pub fn reset(&mut self) {
+        log!("reset");
+        let size = (self.width * self.height) as usize;
+
+        for cell in 0..size {
+            self.cells.set(cell, js_sys::Math::random() < 0.5);
+        }
+    }
+
+    pub fn clear(&mut self) {
+        log!("clear");
+        let size = (self.width * self.height) as usize;
+
+        for cell in 0..size {
+            self.cells.set(cell, false);
+        }
+    }
+
     pub fn toggle_cell(&mut self, row: u32, column: u32) {
         let idx = self.get_index(row, column);
         self.cells.set(idx, !self.cells[idx]);
