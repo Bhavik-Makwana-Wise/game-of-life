@@ -2,10 +2,17 @@ mod utils;
 
 extern crate js_sys;
 extern crate fixedbitset;
+extern crate web_sys;
 
 use fixedbitset::FixedBitSet;
 use std::fmt;
 use wasm_bindgen::prelude::*;
+
+macro_rules! log {
+    ( $( $t:tt)* ) => {
+        web_sys::console::log_1(&format!( $( $t )* ).into());
+    }
+}
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -46,6 +53,7 @@ impl fmt::Display for Universe {
 #[wasm_bindgen]
 impl Universe {
     pub fn new() -> Universe {
+        utils::set_panic_hook();
         let width = 64;
         let height = 64;
         let size = (width * height) as usize;
@@ -90,6 +98,13 @@ impl Universe {
                 let idx = self.get_index(row, col);
                 let cell = self.cells[idx];
                 let live_neighbours = self.live_neighbour_count(row, col);
+                // log!(
+                //    "cell[{}, {}] is initially {:?} and has {} live neighbours",
+                //    row,
+                //    col,
+                //    cell,
+                //    live_neighbours
+                //);
 
                 next.set(idx, match (cell, live_neighbours) {
                     (true, x) if x < 2 => false,
@@ -98,6 +113,7 @@ impl Universe {
                     (false, 3) => true,
                     (otherwise, _) => otherwise,
                 });
+                // log!("     it becomes {:?}", next[idx]);
             }
         }
         self.cells = next;
