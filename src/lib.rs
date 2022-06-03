@@ -70,6 +70,11 @@ impl Universe {
         }
     }
 
+    pub fn toggle_cell(&mut self, row: u32, column: u32) {
+        let idx = self.get_index(row, column);
+        self.cells.set(idx, !self.cells[idx]);
+    }
+
     pub fn set_width(&mut self, width: u32) {
         self.width = width;
         self.cells = FixedBitSet::with_capacity((width*self.height) as usize);
